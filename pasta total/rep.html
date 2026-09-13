@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisador e Reparador PWA -> APK</title>
+    <!-- Importa a biblioteca JSZip para ler e criar ZIPs no navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background-color: #313244;
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            color: #89b4fa;
+            text-align: center;
+        }
+
+        .upload-area {
+            border: 2px dashed #6c7086;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #89b4fa;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #181825;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #45475a;
+        }
+
+        .missing {
+            color: #f38ba8;
+            font-weight: bold;
+        }
+
+        .found {
+            color: #a6e3a1;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #89b4fa;
+            color: #11111b;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #b4befe;
+        }
+
+        button:disabled {
+            background-color: #45475a;
+            cursor: not-allowed;
+        }
+
+        #downloadBtn {
+            background-color: #a6e3a1;
+            margin-top: 20px;
+            display: none;
+            font-size: 1.1em;
+            padding: 15px;
+        }
+
+        #downloadBtn:hover {
+            background-color: #94e2d5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🛠️ Reparador PWA para APK</h1>
+        <p style="text-align: center; color: #a6adc8;">Importe seu projeto .zip para analisar os arquivos.</p>
+
+        <div class="upload-area" onclick="document.getElementById('zipInput').click()">
+            📁 Clique aqui para selecionar o arquivo .ZIP
+            <input type="file" id="zipInput" accept=".zip">
+        </div>
+
+        <div class="status" id="statusArea" style="display: none;">
+            <h3>📊 Resultado da Análise:</h3>
+            <div id="results"></div>
+            <button id="fixAllBtn" onclick="fixAll()">✨ Gerar Arquivos Faltantes</button>
+            <button id="downloadBtn" onclick="downloadZip()">⬇️ Baixar ZIP Corrigido</button>
+        </div>
+    </div>
+
+    <script>
+        let currentZip = null;
+    let filesList = [];
+
+    // Arquivos padrão que vamos injetar
+    const templates = {
+        "manifest.json": `{\n  "name": "Meu App APK",\n  "short_name": "App",\n  "start_url": "/index.html",\n  "display": "standalone",\n  "background_color": "#ffffff",\n  "theme_color": "#000000"\n}`,
+        "service-worker.js": `self.addEventListener('install', (e) => { console.log('SW Instalado'); self.skipWaiting(); });\nself.addEventListener('fetch', (e) => { });`,
+        "capacitor.config.json": `{\n  "appId": "com.meuapp.gerado",\n  "appName": "Meu App",\n  "webDir": ".",\n  "bundledWebRuntime": false\n}`,
+        ".github/workflows/build-apk.yml": `name: Build APK\non: [push, workflow_dispatch]\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - uses: actions/setup-node@v3\n        with: { node-version: '18' }\n      - run: npm install @capacitor/core @capacitor/cli\n      - run: npx cap init "Meu App" "com.meuapp.gerado" --web-dir .\n      - run: npm install @capacitor/android\n      - run: npx cap add android\n      - run: npx cap sync android\n      - run: cd android && ./gradlew assembleDebug\n      - uses: actions/upload-artifact@v3\n        with:\n          name: app-debug.apk\n          path: android/app/build/outputs/apk/debug/app-debug.apk`
+    };
+
+    document.getElementById('zipInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            JSZip.loadAsync(event.target.result).then(function(zip) {
+                currentZip = zip;
+                filesList = Object.keys(zip.files);
+                analyzeFiles();
+            });
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    function analyzeFiles() {
+        document.getElementById('statusArea').style.display = 'block';
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+
+        const checks = [
+            { name: 'manifest.json', desc: 'Manifesto PWA' },
+            { name: 'service-worker.js', desc: 'Service Worker' },
+            { name: 'capacitor.config.json', desc: 'Configuração Capacitor' },
+            { name: '.github/workflows/build-apk.yml', desc: 'Workflow do GitHub Actions' }
+        ];
+
+        checks.forEach(check => {
+            // Verifica se o arquivo existe em qualquer lugar do ZIP
+            const exists = filesList.some(f => f.endsWith(check.name));
+            
+            resultsDiv.innerHTML += `
+                <div class="item">
+                    <span>${check.desc} (${check.name})</span>
+                    <span class="${exists ? 'found' : 'missing'}">${exists ? '✅ Encontrado' : '❌ Faltando'}</span>
+                </div>
+            `;
+        });
+        
+        document.getElementById('downloadBtn').style.display = 'none';
+        document.getElementById('fixAllBtn').style.display = 'block';
+    }
+
+    function fixAll() {
+        // Injeta os arquivos que faltam
+        const checks = Object.keys(templates);
+        
+        checks.forEach(fileName => {
+            const exists = filesList.some(f => f.endsWith(fileName));
+            if (!exists) {
+                currentZip.file(fileName, templates[fileName]);
+                console.log(`Adicionado: ${fileName}`);
+            }
+        });
+
+        alert("✅ Arquivos gerados com sucesso! O workflow do GitHub Actions e as configurações do Capacitor foram injetados.");
+        
+        // Atualiza a lista e a interface
+        filesList = Object.keys(currentZip.files);
+        analyzeFiles();
+        
+        document.getElementById('fixAllBtn').style.display = 'none';
+        document.getElementById('downloadBtn').style.display = 'block';
+    }
+
+    function downloadZip() {
+        currentZip.generateAsync({type:"blob"}).then(function(content) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = "projeto_corrigido_apk.zip";
+            link.click();
+        });
+    }
+    </script>
+
+</body>
+
+</html>
