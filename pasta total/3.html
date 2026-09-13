@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>📦 Build & Deploy</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0d1117
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 2px
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            position: sticky;
+            top: 0;
+            z-index: 10
+        }
+
+        .header h1 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            flex: 1
+        }
+
+        .drop-zone {
+            margin: 14px;
+            border: 2px dashed #30363d;
+            border-radius: 12px;
+            padding: 28px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .drop-zone:hover,
+        .drop-zone.over {
+            border-color: #58a6ff;
+            background: #0d1f3a22
+        }
+
+        .drop-zone .dz-icon {
+            font-size: 36px;
+            margin-bottom: 8px
+        }
+
+        .drop-zone .dz-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #c9d1d9;
+            margin-bottom: 4px
+        }
+
+        .drop-zone .dz-sub {
+            font-size: 11px;
+            color: #8b949e
+        }
+
+        .proj-info {
+            margin: 0 14px 14px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 12px;
+            display: none
+        }
+
+        .proj-info.show {
+            display: block
+        }
+
+        .proj-info h3 {
+            font-size: 12px;
+            color: #58a6ff;
+            margin-bottom: 8px;
+            font-weight: 700
+        }
+
+        .proj-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 11px;
+            color: #8b949e
+        }
+
+        .proj-grid span {
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .proj-grid b {
+            color: #c9d1d9
+        }
+
+        .cfg {
+            margin: 0 14px 14px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 12px
+        }
+
+        .cfg h3 {
+            font-size: 12px;
+            color: #8b949e;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            margin-bottom: 10px
+        }
+
+        .cfg-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px
+        }
+
+        .cfg-row.full {
+            grid-template-columns: 1fr
+        }
+
+        label {
+            display: block;
+            font-size: 10px;
+            color: #8b949e;
+            margin-bottom: 3px
+        }
+
+        input {
+            width: 100%;
+            padding: 7px 10px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 7px;
+            color: #c9d1d9;
+            font-size: 12px;
+            outline: none;
+            font-family: inherit
+        }
+
+        input:focus {
+            border-color: #58a6ff
+        }
+
+        .btn-all {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 14px 14px;
+            padding: 13px;
+            background: linear-gradient(135deg, #1a4731, #0d1f3a);
+            border: 1px solid #3fb95050;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: all .2s;
+            width: calc(100% - 28px)
+        }
+
+        .btn-all:hover {
+            background: linear-gradient(135deg, #238636, #1f6feb33)
+        }
+
+        .btn-all:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        .platforms {
+            padding: 0 14px 80px
+        }
+
+        .plat-card {
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            border: 1px solid
+        }
+
+        .plat-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: filter .15s;
+            user-select: none
+        }
+
+        .plat-head:hover {
+            filter: brightness(1.1)
+        }
+
+        .plat-icon {
+            font-size: 18px;
+            flex-shrink: 0
+        }
+
+        .plat-txt {
+            flex: 1
+        }
+
+        .plat-name {
+            font-size: 13px;
+            font-weight: 700
+        }
+
+        .plat-desc {
+            font-size: 10px;
+            opacity: .6;
+            margin-top: 1px
+        }
+
+        .plat-btns {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0
+        }
+
+        .btn-zip {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .12);
+            border: none;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: background .15s
+        }
+
+        .btn-zip:hover {
+            background: rgba(255, 255, 255, .22)
+        }
+
+        .btn-zip:disabled {
+            opacity: .4;
+            cursor: not-allowed
+        }
+
+        .chevron {
+            font-size: 11px;
+            opacity: .6;
+            transition: transform .2s
+        }
+
+        .chevron.open {
+            transform: rotate(90deg)
+        }
+
+        .plat-body {
+            border-top: 1px solid rgba(255, 255, 255, .08);
+            background: #0d1117cc;
+            display: none;
+            padding: 12px
+        }
+
+        .plat-body.open {
+            display: block
+        }
+
+        .p-eas {
+            background: #0d1f3a22;
+            border-color: #1f6feb40;
+            color: #79c0ff
+        }
+
+        .p-cap {
+            background: #0d2a2a22;
+            border-color: #2dd4bf40;
+            color: #5eead4
+        }
+
+        .p-ghp {
+            background: #0d281822;
+            border-color: #3fb95040;
+            color: #3fb950
+        }
+
+        .p-ele {
+            background: #1a0d3a22;
+            border-color: #a371f740;
+            color: #d2a8ff
+        }
+
+        .p-pwa {
+            background: #2d150022;
+            border-color: #f0883e40;
+            color: #ffa657
+        }
+
+        .p-git {
+            background: #2d0f2022;
+            border-color: #f7768e40;
+            color: #ff7eb6
+        }
+
+        .p-net {
+            background: #0d2a2a22;
+            border-color: #00c7b740;
+            color: #00c7b7
+        }
+
+        .p-ver {
+            background: #1a1a1a;
+            border-color: #ffffff30;
+            color: #e6edf3
+        }
+
+        .p-cln {
+            background: #1a1a1a22;
+            border-color: #8b949e40;
+            color: #c9d1d9
+        }
+
+        .code-blk {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 6px 0
+        }
+
+        .code-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 10px;
+            background: #161b22;
+            border-bottom: 1px solid #21262d
+        }
+
+        .code-hdr span {
+            font-size: 10px;
+            color: #8b949e;
+            font-family: monospace
+        }
+
+        .btn-cp {
+            background: none;
+            border: none;
+            font-size: 10px;
+            color: #8b949e;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px
+        }
+
+        .btn-cp:hover {
+            color: #c9d1d9;
+            background: #21262d
+        }
+
+        pre {
+            padding: 10px;
+            font-size: 10px;
+            font-family: monospace;
+            color: #c9d1d9;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.5;
+            max-height: 200px;
+            overflow-y: auto
+        }
+
+        .alert {
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 11px;
+            margin-bottom: 8px;
+            display: flex;
+            gap: 6px;
+            line-height: 1.4
+        }
+
+        .a-yellow {
+            background: #2d1f0022;
+            border-left: 3px solid #e3b341;
+            color: #e3b341
+        }
+
+        .a-blue {
+            background: #0d1f3a;
+            border-left: 3px solid #58a6ff;
+            color: #79c0ff
+        }
+
+        .a-teal {
+            background: #0d2a2a22;
+            border-left: 3px solid #00c7b7;
+            color: #00c7b7
+        }
+
+        .a-gray {
+            background: #1a1a1a;
+            border-left: 3px solid #8b949e;
+            color: #c9d1d9
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 9999;
+            transition: opacity .3s;
+            pointer-events: none;
+            white-space: nowrap
+        }
+
+        .t-ok {
+            background: #238636;
+            color: #fff
+        }
+
+        .t-err {
+            background: #da3633;
+            color: #fff
+        }
+
+        .t-info {
+            background: #1f6feb;
+            color: #fff
+        }
+
+        .progress {
+            height: 3px;
+            background: #21262d;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1f6feb, #3fb950);
+            border-radius: 2px;
+            transition: width .3s
+        }
+
+        .file-tree {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 8px;
+            max-height: 160px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 10px;
+            color: #8b949e;
+            line-height: 1.7
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <span style="font-size:20px">📦</span>
+        <h1>Build & Deploy</h1>
+        <span id="proj-badge" style="display:none;font-size:11px;padding:2px 8px;border-radius:8px;background:#21262d;color:#58a6ff;border:1px solid #30363d"></span>
+    </div>
+
+    <!-- DROP ZONE -->
+    <div class="drop-zone" id="dz" onclick="document.getElementById('fi').click()">
+        <div class="dz-icon">📂</div>
+        <div class="dz-title">Importe o ZIP do seu projeto</div>
+        <div class="dz-sub">Clique ou arraste aqui · Detecta automaticamente as configurações</div>
+    </div>
+    <input type="file" id="fi" accept=".zip" style="display:none" onchange="importarZip(this)"/>
+
+    <!-- INFO DO PROJETO -->
+    <div class="proj-info" id="proj-info">
+        <h3>📊 Projeto detectado</h3>
+        <div class="proj-grid" id="proj-grid"></div>
+        <div class="progress" id="prog-bar" style="display:none">
+            <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+        <div class="file-tree" id="file-tree" style="margin-top:8px;display:none"></div>
+        <button onclick="document.getElementById('file-tree').style.display=document.getElementById('file-tree').style.display==='none'?'block':'none'" style="margin-top:6px;background:none;border:1px solid #30363d;color:#8b949e;padding:3px 8px;border-radius:5px;font-size:10px;cursor:pointer">📄 Ver arquivos</button>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="cfg">
+        <h3>⚙️ Configurações</h3>
+        <div class="cfg-row">
+            <div>
+                <label>Token EAS (Expo)</label>
+                <input type="password" id="eas-token" placeholder="expo_..." oninput="salvar()"/>
+            </div>
+            <div>
+                <label>Usuário GitHub</label>
+                <input type="text" id="gh-user" placeholder="seu-usuario" oninput="salvar()"/>
+            </div>
+        </div>
+        <div class="cfg-row">
+            <div>
+                <label>Repositório GitHub</label>
+                <input type="text" id="gh-repo" placeholder="meu-projeto" oninput="salvar()"/>
+            </div>
+            <div>
+                <label>Token GitHub</label>
+                <input type="password" id="gh-token" placeholder="ghp_..." oninput="salvar()"/>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTÃO BAIXAR TUDO -->
+    <button class="btn-all" id="btn-all" onclick="baixarTodos()">
+  <span id="btn-all-txt">🗜️ Baixar TODOS os ZIPs (9 plataformas)</span>
+</button>
+
+    <!-- PLATAFORMAS -->
+    <div class="platforms" id="platforms"></div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast" style="opacity:0"></div>
+
+    <script>
+        // ══════════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════════
+let VFS = {};
+let PROJ = { name:'meu-projeto', version:'1.0.0', deps:{}, devDeps:{}, scripts:{} };
+
+// ══════════════════════════════════════════
+// PLATAFORMAS
+// ══════════════════════════════════════════
+const PLATS = [
+  { id:'eas',  cls:'p-eas', icon:'📱', name:'APK via EAS (Expo)',        desc:'Build APK/AAB pelo serviço EAS da Expo' },
+  { id:'cap',  cls:'p-cap', icon:'⚡', name:'APK via Capacitor',          desc:'Empacota o projeto web como APK Android' },
+  { id:'ghp',  cls:'p-ghp', icon:'🌐', name:'GitHub Pages',               desc:'Publica no GitHub Pages gratuitamente' },
+  { id:'ele',  cls:'p-ele', icon:'🖥', name:'Executável (Electron)',       desc:'Executável Desktop Win/Mac/Linux' },
+  { id:'pwa',  cls:'p-pwa', icon:'📲', name:'PWA (Instalável no Cel.)',    desc:'Instala como app no celular sem APK' },
+  { id:'git',  cls:'p-git', icon:'🚀', name:'Deploy via Git',              desc:'Configura e publica via repositório Git' },
+  { id:'net',  cls:'p-net', icon:'🔷', name:'Netlify (grátis)',            desc:'Deploy gratuito com URL pública em minutos' },
+  { id:'ver',  cls:'p-ver', icon:'▲',  name:'Vercel (grátis)',             desc:'Deploy grátis + SSL automático' },
+  { id:'cln',  cls:'p-cln', icon:'✨', name:'Versão Limpa (Standalone)',   desc:'ZIP limpo sem dependências do Replit' },
+];
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.onload = () => { carregarCfg(); renderPlats(); };
+
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+function salvar(){
+  localStorage.setItem('bd-eas', document.getElementById('eas-token').value);
+  localStorage.setItem('bd-ghu', document.getElementById('gh-user').value);
+  localStorage.setItem('bd-ghr', document.getElementById('gh-repo').value);
+  localStorage.setItem('bd-ght', document.getElementById('gh-token').value);
+}
+function carregarCfg(){
+  document.getElementById('eas-token').value = localStorage.getItem('bd-eas')||'';
+  document.getElementById('gh-user').value   = localStorage.getItem('bd-ghu')||'';
+  document.getElementById('gh-repo').value   = localStorage.getItem('bd-ghr')||'';
+  document.getElementById('gh-token').value  = localStorage.getItem('bd-ght')||'';
+}
+function cfg(){ return {
+  eas: document.getElementById('eas-token').value,
+  ghu: document.getElementById('gh-user').value,
+  ghr: document.getElementById('gh-repo').value,
+  ght: document.getElementById('gh-token').value,
+};}
+
+// ══════════════════════════════════════════
+// IMPORTAR ZIP
+// ══════════════════════════════════════════
+async function importarZip(inp){
+  const f = inp.files[0]; if(!f) return;
+  const pb = document.getElementById('prog-bar');
+  const pf = document.getElementById('prog-fill');
+  const pi = document.getElementById('proj-info');
+  pi.classList.add('show');
+  pb.style.display='block';
+  pf.style.width='10%';
+  toast('⏳ Lendo ZIP...','info');
+  try{
+    const JSZ = await loadJSZ();
+    const zip = await JSZ.loadAsync(await f.arrayBuffer());
+    pf.style.width='40%';
+    VFS = {};
+    const entries = Object.entries(zip.files).filter(([,e])=>!e.dir);
+    let i=0;
+    for(const [path,entry] of entries){
+      VFS[path] = await entry.async('text').catch(()=>'[binário]');
+      i++;
+      pf.style.width = (40 + Math.round(i/entries.length*55))+'%';
+    }
+    pf.style.width='100%';
+    // Detectar dados do projeto
+    try{
+      const pkg = JSON.parse(VFS['package.json']||VFS[Object.keys(VFS).find(k=>k.endsWith('/package.json')&&!k.includes('node_modules'))||'']||'{}');
+      PROJ.name    = (pkg.name||f.name.replace('.zip','')).replace(/@[^/]+\//,'').toLowerCase().replace(/\s+/g,'-');
+      PROJ.version = pkg.version||'1.0.0';
+      PROJ.deps    = pkg.dependencies||{};
+      PROJ.devDeps = pkg.devDependencies||{};
+      PROJ.scripts = pkg.scripts||{};
+      PROJ.desc    = pkg.description||'';
+    }catch{ PROJ.name = f.name.replace('.zip',''); }
+    // Detectar stack
+    const allKeys = [...Object.keys(PROJ.deps),...Object.keys(PROJ.devDeps)];
+    PROJ.hasReact  = allKeys.includes('react') || Object.keys(VFS).some(f=>f.endsWith('.tsx')||f.endsWith('.jsx'));
+    PROJ.hasVite   = allKeys.includes('vite');
+    PROJ.hasExpo   = allKeys.includes('expo');
+    PROJ.hasNext   = allKeys.includes('next');
+    PROJ.hasTW     = allKeys.includes('tailwindcss');
+    PROJ.hasTS     = allKeys.includes('typescript') || Object.keys(VFS).some(f=>f.endsWith('.ts')||f.endsWith('.tsx'));
+    PROJ.hasExpress= allKeys.includes('express');
+    PROJ.hasPrisma = allKeys.includes('@prisma/client');
+    PROJ.hasPG     = allKeys.includes('pg')||allKeys.includes('@neondatabase/serverless');
+    // Atualizar UI
+    atualizarProjInfo();
+    // Atualizar repo default
+    if(!document.getElementById('gh-repo').value){
+      document.getElementById('gh-repo').value = PROJ.name;
+      salvar();
+    }
+    document.getElementById('proj-badge').textContent = '📁 '+PROJ.name;
+    document.getElementById('proj-badge').style.display='inline-block';
+    // Atualizar conteúdo das plataformas
+    renderPlats();
+    toast(`✅ ${entries.length} arquivos importados!`,'ok');
+  }catch(e){
+    toast('❌ Erro: '+e.message,'err');
+  }finally{
+    setTimeout(()=>pb.style.display='none',1000);
+  }
+  inp.value='';
+}
+
+function atualizarProjInfo(){
+  const files = Object.keys(VFS);
+  const stack = [];
+  if(PROJ.hasExpo)  stack.push('Expo');
+  if(PROJ.hasNext)  stack.push('Next.js');
+  else if(PROJ.hasReact) stack.push('React'+(PROJ.hasVite?' + Vite':''));
+  if(PROJ.hasTS)    stack.push('TypeScript');
+  if(PROJ.hasTW)    stack.push('Tailwind');
+  if(PROJ.hasExpress) stack.push('Express');
+
+  const totalLines = files.reduce((s,f)=>{
+    const c=VFS[f]||''; return s+(c==='[binário]'?1:c.split('\n').length);
+  },0);
+
+  document.getElementById('proj-grid').innerHTML = `
+    <span>📄 <b>${files.length}</b> arquivos</span>
+    <span>📦 <b>${PROJ.name}</b></span>
+    <span>🏷️ v<b>${PROJ.version}</b></span>
+    <span>📝 ~<b>${totalLines.toLocaleString('pt-BR')}</b> linhas</span>
+    <span>🔧 <b>${stack.join(', ')||'Genérico'}</b></span>
+    <span>📚 <b>${Object.keys(PROJ.deps).length}</b> dependências</span>
+  `;
+
+  // Árvore de arquivos
+  document.getElementById('file-tree').innerHTML = files
+    .filter(f=>!f.includes('node_modules'))
+    .sort()
+    .map(f=>`<div>${f}</div>`)
+    .join('');
+}
+
+// ══════════════════════════════════════════
+// RENDER PLATAFORMAS
+// ══════════════════════════════════════════
+function renderPlats(){
+  document.getElementById('platforms').innerHTML = PLATS.map(p=>`
+    <div class="plat-card ${p.cls}" id="card-${p.id}">
+      <div class="plat-head" onclick="toggle('${p.id}')">
+        <span class="plat-icon">${p.icon}</span>
+        <div class="plat-txt">
+          <div class="plat-name">${p.name}</div>
+          <div class="plat-desc">${p.desc}</div>
+        </div>
+        <div class="plat-btns">
+          <button class="btn-zip" id="bz-${p.id}" onclick="event.stopPropagation();baixarZip('${p.id}')">
+            <span id="bzi-${p.id}">⬇️</span> ZIP
+          </button>
+          <span class="chevron" id="chv-${p.id}">▶</span>
+        </div>
+      </div>
+      <div class="plat-body" id="body-${p.id}">
+        ${getBody(p.id)}
+      </div>
+    </div>`).join('');
+}
+
+function toggle(id){
+  const b=document.getElementById('body-'+id);
+  const c=document.getElementById('chv-'+id);
+  const open=b.classList.toggle('open');
+  c.classList.toggle('open',open);
+  if(open) document.getElementById('body-'+id).innerHTML=getBody(id);
+}
+
+// ══════════════════════════════════════════
+// CONTEÚDO DAS PLATAFORMAS
+// ══════════════════════════════════════════
+function getBody(id){
+  const c=cfg();
+  const n=PROJ.name||'meu-projeto';
+  const bodies = {
+    eas:`
+      <div class="alert a-yellow"><span>⚠️</span><span>Requer conta <a href="https://expo.dev" target="_blank" style="text-decoration:underline">expo.dev</a> + EAS CLI instalado</span></div>
+      <div style="font-size:11px;color:#8b949e;margin-bottom:4px;font-weight:600">Instalar e fazer login:</div>
+      ${cb('npm install -g @expo/eas-cli\nnpm install\nexpo login\neas login')}
+      <div style="font-size:11px;color:#8b949e;margin:8px 0 4px;font-weight:600">Gerar APK:</div>
+      ${cb('eas build --platform android --profile preview')}
+      <div style="font-size:11px;color:#8b949e;margin:8px 0 4px;font-weight:600">Build local (offline):</div>
+      ${cb('eas build --platform android --profile preview --local')}
+      <div style="font-size:11px;color:#3fb950;margin-top:8px">✅ O ZIP gerado inclui: app.json · eas.json · babel.config.js · package.json · README</div>`,
+
+    cap:`
+      <div style="font-size:11px;color:#8b949e;margin-bottom:4px;font-weight:600">Instalar Capacitor:</div>
+      ${cb('npm install\nnpm install @capacitor/core @capacitor/android @capacitor/cli\nnpx cap init\nnpx cap add android')}
+      <div style="font-size:11px;color:#8b949e;margin:8px 0 4px;font-weight:600">Build APK (linha de comando):</div>
+      ${cb('npm run build\nnpx cap sync\ncd android && ./gradlew assembleDebug\n# APK: android/app/build/outputs/apk/debug/')}
+      <div style="font-size:11px;color:#3fb950;margin-top:8px">✅ O ZIP inclui: capacitor.config.ts · android/build.gradle · AndroidManifest.xml · scripts/build-android.sh</div>`,
+
+    ghp:`
+      <div style="font-size:11px;color:#8b949e;margin-bottom:4px;font-weight:600">Subir para GitHub e ativar Pages:</div>
+      ${cb(`git init && git add .\ngit commit -m "inicial"\ngit remote add origin https://github.com/${c.ghu||'USUARIO'}/${c.ghr||n}.git\ngit push -u origin main`)}
+      <div style="font-size:11px;color:#8b949e;margin:8px 0 4px">Depois: Settings → Pages → Source → <b>GitHub Actions</b></div>
+      ${c.ghu&&c.ghr?`<a href="https://${c.ghu}.github.io/${c.ghr}/" target="_blank" style="font-size:11px;color:#3fb950;text-decoration:underline">🌐 ${c.ghu}.github.io/${c.ghr}/</a>`:''}
+      <div style="font-size:11px;color:#3fb950;margin-top:8px">✅ O ZIP inclui: .github/workflows/deploy.yml · vite.config.ts · package.json</div>`,
+
+    ele:`
+      <div style="font-size:11px;color:#8b949e;margin-bottom:4px;font-weight:600">Instalar e desenvolver:</div>
+      ${cb('npm install\nnpm run electron:dev')}
+      <div style="font-size:11px;color:#8b949e;margin:8px 0 4px;font-weight:600">Gerar executável:</div>
+      ${cb('npm run electron:build\n# Windows: dist-electron/*.exe\n# Linux: dist-electron/*.AppImage\n# macOS: dist-electron/*.dmg')}
+      <div style="font-size:11px;color:#3fb950;margin-top:8px">✅ O ZIP inclui: electron/main.js · electron/preload.js · electron-builder.yml · package.json</div>`,
+
+    pwa:`
+      <div class="alert a-blue"><span>💡</span><span>PWA precisa de HTTPS. Publique em Netlify, Vercel ou GitHub Pages.</span></div>
+      <div style="font-size:11px;color:#8b949e;margin-bottom:4px;font-weight:600">Publicar e instalar no celular:</div>
+      ${cb('npm run build\n# Arraste dist/ para https://app.netlify.com/drop\n# Acesse no Chrome → Menu → "Adicionar à tela inicial"')}
+      <div style="font-size:11px;color:#3fb950;margin-top:8px">✅ O ZIP inclui: public/manifest.json · public/sw.js · index.html com tags PWA</div>`,
+
+    git:`
+      <div style="font-size:11px;color:#8b949e;margin-bottom:4px;font-weight:600">Criar repo e fazer push:</div>
+      ${cb(`git init && git add . && git commit -m "inicial"\ngit remote add origin https://github.com/${c.ghu||'USER'}/${c.ghr||n}.git\ngit push -u origin main`)}
+      <div style="font-size:11px;color:#8b949e;margin:8px 0 4px;font-weight:600">Deploy rápido:</div>
+      ${cb('npx vercel\n# ou\nnpx netlify-cli deploy --dir dist --prod')}
+      <div style="font-size:11px;color:#3fb950;margin-top:8px">✅ O ZIP inclui: .github/workflows/ci.yml · vite.config.ts · package.json</div>`,
+
+    net:`
+      <div class="alert a-teal"><span>🔷</span><span>Deploy grátis em <a href="https://netlify.com" target="_blank" style="text-decoration:underline">netlify.com</a> — sem cartão.</span></div>
+      <div style="font-size:11px;color:#8b949e;margin-bottom:4px;font-weight:600">Método mais fácil:</div>
+      ${cb('npm run build\n# Acesse https://app.netlify.com/drop\n# Arraste a pasta dist/')}
+      <div style="font-size:11px;color:#8b949e;margin:8px 0 4px;font-weight:600">Via CLI:</div>
+      ${cb('npx netlify-cli deploy --dir dist --prod')}
+      <a href="https://app.netlify.com/drop" target="_blank" style="font-size:11px;color:#00c7b7;text-decoration:underline">🔷 Abrir Netlify Drop</a>
+      <div style="font-size:11px;color:#3fb950;margin-top:8px">✅ O ZIP inclui: netlify.toml · vite.config.ts · package.json</div>`,
+
+    ver:`
+      <div class="alert a-gray"><span>▲</span><span>Deploy grátis em <a href="https://vercel.com" target="_blank" style="text-decoration:underline">vercel.com</a> — SSL + CDN global.</span></div>
+      ${cb('npm run build\nnpx vercel\n# Siga o assistente → Framework: Vite')}
+      <a href="https://vercel.com/new" target="_blank" style="font-size:11px;color:#e6edf3;text-decoration:underline">▲ Abrir Vercel Dashboard</a>
+      <div style="font-size:11px;color:#3fb950;margin-top:8px">✅ O ZIP inclui: vercel.json · vite.config.ts · package.json</div>`,
+
+    cln:`
+      <div style="font-size:12px;color:#8b949e;margin-bottom:8px">ZIP limpo sem nenhuma dependência do Replit ou workspace. Pronto para rodar em qualquer máquina.</div>
+      ${cb('npm install\nnpm run dev\n# http://localhost:5173')}
+      <div style="font-size:11px;color:#8b949e;margin:8px 0 4px;font-weight:600">Publicar:</div>
+      ${cb('npm run build\n# Arraste dist/ para https://app.netlify.com/drop')}
+      <div style="background:#0d1117;border:1px solid #21262d;border-radius:7px;padding:8px;margin-top:8px;font-size:11px;color:#8b949e">
+        ✓ ${Object.keys(VFS).filter(f=>!f.includes('node_modules')).length} arquivo(s) do projeto<br>
+        ✓ package.json limpo (sem @replit/* e @workspace/*)<br>
+        ✓ vite.config.ts sem plugins do Replit<br>
+        ✓ .gitignore + README.md
+      </div>`,
+  };
+  return bodies[id]||'';
+}
+
+function cb(code){
+  const id='c'+Math.random().toString(36).slice(2,6);
+  return `<div class="code-blk">
+    <div class="code-hdr"><span>terminal</span><button class="btn-cp" onclick="cp('${id}','${esc(code)}')">📋 Copiar</button></div>
+    <pre id="${id}">${eh(code)}</pre>
+  </div>`;
+}
+function cp(id,code){
+  navigator.clipboard.writeText(code.replace(/\\n/g,'\n')).then(()=>{
+    toast('✅ Copiado!','ok');
+  });
+}
+
+// ══════════════════════════════════════════
+// GERAR ZIPS
+// ══════════════════════════════════════════
+async function baixarZip(id){
+  const btn=document.getElementById('bz-'+id);
+  const ico=document.getElementById('bzi-'+id);
+  btn.disabled=true; ico.textContent='⏳';
+  salvar();
+  try{
+    const JSZ=await loadJSZ();
+    const blob=await gerarZip(id,JSZ);
+    salvarBlob(blob,`${PROJ.name}-${id}.zip`);
+    toast(`✅ ${id}.zip gerado!`,'ok');
+  }catch(e){ toast('❌ '+e.message,'err'); }
+  finally{ btn.disabled=false; ico.textContent='⬇️'; }
+}
+
+async function baixarTodos(){
+  const btn=document.getElementById('btn-all');
+  const txt=document.getElementById('btn-all-txt');
+  btn.disabled=true;
+  salvar();
+  const ids=['cln','net','ver','ghp','pwa','cap','eas','ele','git'];
+  try{
+    const JSZ=await loadJSZ();
+    const super_=new JSZ();
+    for(let i=0;i<ids.length;i++){
+      txt.textContent=`⏳ Gerando ${ids[i]} (${i+1}/${ids.length})...`;
+      const blob=await gerarZip(ids[i],JSZ);
+      super_.file(`${PROJ.name}-${ids[i]}.zip`,await blob.arrayBuffer());
+    }
+    txt.textContent='⏳ Compactando...';
+    const final=await super_.generateAsync({type:'blob'});
+    salvarBlob(final,`${PROJ.name}-todos-os-builds.zip`);
+    toast('✅ Todos os ZIPs gerados!','ok');
+  }catch(e){ toast('❌ '+e.message,'err'); }
+  finally{ btn.disabled=false; txt.textContent='🗜️ Baixar TODOS os ZIPs (9 plataformas)'; }
+}
+
+// ══════════════════════════════════════════
+// GERAÇÃO DE CONTEÚDO
+// ══════════════════════════════════════════
+const GITIGNORE=`node_modules/\ndist/\nbuild/\n.expo/\n*.local\n.env\n.DS_Store\n*.log\nandroid/\nios/\n`;
+
+function cleanDeps(d={}){
+  const r={};
+  for(const[k,v]of Object.entries(d))
+    if(!k.startsWith('@replit/')&&!k.startsWith('@workspace/')) r[k]=v;
+  return r;
+}
+
+function viteConfig(){
+  return `import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import path from "path";
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: { alias: { "@": path.resolve(import.meta.dirname, "src") } },
+  server: { port: 5173, host: "0.0.0.0" },
+  build: { outDir: "dist" },
+});
+`;}
+
+function pkgClean(extra={}){
+  return JSON.stringify({
+    name:PROJ.name, version:PROJ.version, type:'module',
+    scripts:{ dev:'vite', build:'vite build', preview:'vite preview' },
+    dependencies:cleanDeps(PROJ.deps),
+    devDependencies:{...cleanDeps(PROJ.devDeps),vite:'^6.0.0','@vitejs/plugin-react':'^4.0.0','@tailwindcss/vite':'^4.0.0',tailwindcss:'^4.0.0'},
+    ...extra
+  },null,2);
+}
+
+async function gerarZip(id,JSZ){
+  const zip=new JSZ();
+  const c=cfg();
+  const n=PROJ.name;
+  const appId=`com.${n.replace(/-/g,'')}.app`;
+
+  // Adicionar arquivos do VFS (exceto configs que serão substituídas)
+  const skip=new Set(['package.json','vite.config.ts','vite.config.js']);
+  for(const[path,content]of Object.entries(VFS)){
+    if(!skip.has(path)&&!path.includes('node_modules')) zip.file(path,content);
+  }
+  zip.file('.gitignore',GITIGNORE);
+
+  if(id==='eas'){
+    zip.file('app.json',JSON.stringify({expo:{
+      name:n, slug:n, version:PROJ.version,
+      orientation:'portrait', icon:'./assets/icon.png',
+      splash:{image:'./assets/splash.png',resizeMode:'contain',backgroundColor:'#0d1117'},
+      android:{adaptiveIcon:{foregroundImage:'./assets/adaptive-icon.png',backgroundColor:'#0d1117'},package:appId},
+      ios:{supportsTablet:true,bundleIdentifier:appId},
+      extra:{eas:{projectId:''}},
+      owner: c.ghu||'SEU_USUARIO_EXPO',
+    }},null,2));
+    zip.file('eas.json',JSON.stringify({
+      cli:{version:'>= 16.0.0',appVersionSource:'local'},
+      build:{
+        preview:{android:{buildType:'apk',gradleCommand:':app:assembleRelease',resourceClass:'medium'},distribution:'internal',node:'20.18.0',cache:{disabled:false},env:{}},
+        development:{developmentClient:true,distribution:'internal',android:{buildType:'apk',resourceClass:'medium'},node:'20.18.0',cache:{disabled:false}},
+        production:{android:{buildType:'app-bundle',resourceClass:'medium'},node:'20.18.0',cache:{disabled:false}},
+      },
+      submit:{production:{}},
+    },null,2));
+    zip.file('babel.config.js',`module.exports=function(api){api.cache(true);return{presets:['babel-preset-expo']};};\n`);
+    zip.file('.env.example',`EXPO_TOKEN=${c.eas||'seu_token_expo_aqui'}\n`);
+    zip.file('package.json',JSON.stringify({
+      name:n, version:PROJ.version, main:'node_modules/expo/AppEntry.js',
+      scripts:{start:'expo start',android:'expo run:android','build:apk':'eas build --platform android --profile preview'},
+      dependencies:{expo:'~54.0.0','expo-status-bar':'~2.0.0',react:'19.0.0','react-native':'0.76.0',...cleanDeps(PROJ.deps)},
+      devDependencies:{'@babel/core':'^7.20.0',typescript:'^5.1.3'},
+    },null,2));
+    zip.file('README-EAS.md',`# Build APK via EAS — ${n}\n\n## Setup\n\`\`\`bash\nnpm install -g @expo/eas-cli\nnpm install\nexpo login\neas login\n\`\`\`\n\n## Gerar APK\n\`\`\`bash\neas build --platform android --profile preview\n\`\`\`\n\n## Build local\n\`\`\`bash\neas build --platform android --profile preview --local\n\`\`\`\n\n## Perfis\n| preview | APK | Instalar no celular |\n| production | AAB | Google Play |\n`);
+
+  }else if(id==='cap'){
+    zip.file('vite.config.ts',viteConfig());
+    zip.file('package.json',pkgClean({dependencies:{...cleanDeps(PROJ.deps),'@capacitor/core':'^6.0.0','@capacitor/android':'^6.0.0','@capacitor/cli':'^6.0.0'}}));
+    zip.file('capacitor.config.ts',`import{CapacitorConfig}from'@capacitor/cli';\nconst config:CapacitorConfig={appId:'${appId}',appName:'${n}',webDir:'dist',server:{androidScheme:'https'}};\nexport default config;\n`);
+    zip.file('android/build.gradle',`buildscript{repositories{google();mavenCentral()}\ndependencies{classpath'com.android.tools.build:gradle:8.2.2'}}\nallprojects{repositories{google();mavenCentral()}}\n`);
+    zip.file('android/app/build.gradle',`apply plugin:'com.android.application'\nandroid{\n  compileSdkVersion 34\n  defaultConfig{\n    applicationId "${appId}"\n    minSdkVersion 22\n    targetSdkVersion 34\n    versionCode 1\n    versionName "${PROJ.version}"\n  }\n  buildTypes{release{minifyEnabled false}}\n}\n`);
+    zip.file('android/app/src/main/AndroidManifest.xml',`<?xml version="1.0" encoding="utf-8"?>\n<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n  <uses-permission android:name="android.permission.INTERNET"/>\n  <application android:label="${n}" android:usesCleartextTraffic="true">\n    <activity android:name=".MainActivity" android:exported="true">\n      <intent-filter>\n        <action android:name="android.intent.action.MAIN"/>\n        <category android:name="android.intent.category.LAUNCHER"/>\n      </intent-filter>\n    </activity>\n  </application>\n</manifest>\n`);
+    zip.file('android/app/src/main/res/values/strings.xml',`<?xml version="1.0" encoding="utf-8"?>\n<resources><string name="app_name">${n}</string></resources>\n`);
+    zip.file('scripts/build-android.sh',`#!/bin/bash\nset -e\nnpm run build\nnpx cap sync android\necho "Abra android/ no Android Studio"\n`);
+    zip.file('README-CAPACITOR.md',`# APK via Capacitor — ${n}\n\n## Setup\n\`\`\`bash\nnpm install\nnpx cap init "${n}" "${appId}" --web-dir dist\nnpx cap add android\n\`\`\`\n\n## Build APK\n\`\`\`bash\nnpm run build && npx cap sync\ncd android && ./gradlew assembleDebug\n# APK: android/app/build/outputs/apk/debug/app-debug.apk\n\`\`\`\n`);
+
+  }else if(id==='ghp'){
+    const repo=c.ghr||n;
+    zip.file('vite.config.ts',viteConfig());
+    zip.file('package.json',pkgClean());
+    zip.file('.github/workflows/deploy.yml',`name: Deploy to GitHub Pages\non:\n  push:\n    branches: [main,master]\n  workflow_dispatch:\npermissions:\n  contents: read\n  pages: write\n  id-token: write\nconcurrency:\n  group: "pages"\n  cancel-in-progress: false\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with: {node-version: '20', cache: 'npm'}\n      - run: npm ci\n      - run: npm run build\n      - uses: actions/upload-pages-artifact@v3\n        with: {path: ./dist}\n  deploy:\n    environment:\n      name: github-pages\n      url: \${{ steps.deployment.outputs.page_url }}\n    runs-on: ubuntu-latest\n    needs: build\n    steps:\n      - id: deployment\n        uses: actions/deploy-pages@v4\n`);
+    zip.file('README-GHPAGES.md',`# GitHub Pages — ${n}\n\n## Deploy\n\`\`\`bash\ngit init && git add . && git commit -m "inicial"\ngit remote add origin https://github.com/${c.ghu||'USUARIO'}/${repo}.git\ngit push -u origin main\n\`\`\`\n\nSettings → Pages → Source → GitHub Actions\n\nURL: https://${c.ghu||'USUARIO'}.github.io/${repo}/\n`);
+
+  }else if(id==='ele'){
+    zip.file('vite.config.ts',viteConfig());
+    zip.file('package.json',JSON.stringify({
+      name:n, version:PROJ.version, main:'electron/main.js', type:'commonjs',
+      scripts:{dev:'vite',build:'vite build','electron:dev':'concurrently "npm run dev" "wait-on http://localhost:5173 && electron ."','electron:build':'npm run build && electron-builder'},
+      dependencies:cleanDeps(PROJ.deps),
+      devDependencies:{...cleanDeps(PROJ.devDeps),electron:'^29.0.0','electron-builder':'^24.0.0',concurrently:'^8.0.0','wait-on':'^7.0.0',vite:'^6.0.0','@vitejs/plugin-react':'^4.0.0'},
+    },null,2));
+    zip.file('electron/main.js',`const{app,BrowserWindow}=require('electron');\nconst path=require('path');\nconst isDev=process.env.NODE_ENV==='development';\nfunction createWindow(){\n  const win=new BrowserWindow({width:1280,height:800,webPreferences:{nodeIntegration:false,contextIsolation:true,preload:path.join(__dirname,'preload.js')},title:'${n}'});\n  if(isDev){win.loadURL('http://localhost:5173');win.webContents.openDevTools();}\n  else win.loadFile(path.join(__dirname,'../dist/index.html'));\n}\napp.whenReady().then(()=>{createWindow();app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)createWindow();});});\napp.on('window-all-closed',()=>{if(process.platform!=='darwin')app.quit();});\n`);
+    zip.file('electron/preload.js',`const{contextBridge}=require('electron');\ncontextBridge.exposeInMainWorld('electronAPI',{platform:process.platform,versions:process.versions});\n`);
+    zip.file('electron-builder.yml',`appId: ${appId}\nproductName: "${n}"\ndirectories:\n  output: dist-electron\nfiles:\n  - dist/**/*\n  - electron/**/*\n  - package.json\nwin:\n  target: [{target: nsis, arch: [x64]}]\nmac:\n  target: dmg\nlinux:\n  target: AppImage\n`);
+    zip.file('README-ELECTRON.md',`# Electron — ${n}\n\n\`\`\`bash\nnpm install\nnpm run electron:dev    # desenvolver\nnpm run electron:build  # gerar executável\n\`\`\`\n\nSaída em dist-electron/: .exe (Win) · .dmg (Mac) · .AppImage (Linux)\n`);
+
+  }else if(id==='pwa'){
+    zip.file('vite.config.ts',viteConfig());
+    zip.file('package.json',pkgClean());
+    zip.file('public/manifest.json',JSON.stringify({name:n,short_name:n,start_url:'/',display:'standalone',background_color:'#0d1117',theme_color:'#58a6ff',description:`App ${n}`,icons:[{src:'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any maskable'}]},null,2));
+    zip.file('public/sw.js',`const C='pwa-v1';const A=['/','/index.html'];\nself.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(A)));});\nself.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});\nself.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(cached=>cached||fetch(e.request).then(res=>{if(res&&res.status===200){const cl=res.clone();caches.open(C).then(c=>c.put(e.request,cl));}return res;}).catch(()=>caches.match('/index.html'))));});\n`);
+    // Verificar se tem index.html no VFS, senão criar
+    if(!VFS['index.html']){
+      zip.file('index.html',`<!DOCTYPE html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8"/>\n  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>\n  <meta name="theme-color" content="#58a6ff"/>\n  <meta name="mobile-web-app-capable" content="yes"/>\n  <meta name="apple-mobile-web-app-capable" content="yes"/>\n  <meta name="apple-mobile-web-app-title" content="${n}"/>\n  <link rel="manifest" href="/manifest.json"/>\n  <link rel="apple-touch-icon" href="/icon-192.png"/>\n  <title>${n}</title>\n</head>\n<body>\n  <div id="root"></div>\n  <script type="module" src="/src/main.tsx">
+    </script>\n <script>
+        \n    if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js'));\n  
+    </script>\n
+</body>\n
+
+</html>\n`);
+}
+zip.file('README-PWA.md',`# PWA — ${n}\n\n## Publicar\n\`\`\`bash\nnpm run build\n# Arraste dist/ para
+https://app.netlify.com/drop\n\`\`\`\n\n## Instalar no celular\n1. Publique em HTTPS\n2. Chrome Android → Menu →
+"Adicionar à tela inicial"\n`);
+
+}else if(id==='git'){
+zip.file('vite.config.ts',viteConfig());
+zip.file('package.json',pkgClean());
+zip.file('.github/workflows/ci.yml',`name: CI\non: [push,pull_request]\njobs:\n build:\n runs-on: ubuntu-latest\n
+steps:\n - uses: actions/checkout@v4\n - uses: actions/setup-node@v4\n with: {node-version: '20'}\n - run: npm ci\n -
+run: npm run build\n - uses: actions/upload-artifact@v4\n with: {name: dist, path: dist/}\n`);
+zip.file('README-GIT.md',`# Git Deploy — ${n}\n\n\`\`\`bash\ngit init && git add . && git commit -m "inicial"\ngit
+remote add origin https://github.com/${c.ghu||'USER'}/${c.ghr||n}.git\ngit push -u origin main\n\`\`\`\n\n##
+Deploy\n\`\`\`bash\nnpx vercel\n# ou\nnpx netlify-cli deploy --dir dist --prod\n\`\`\`\n`);
+
+}else if(id==='net'){
+zip.file('vite.config.ts',viteConfig());
+zip.file('package.json',pkgClean());
+zip.file('netlify.toml',`[build]\n command = "npm run build"\n publish = "dist"\n\n[build.environment]\n NODE_VERSION =
+"20"\n\n[[redirects]]\n from = "/*"\n to = "/index.html"\n status = 200\n`);
+zip.file('README-NETLIFY.md',`# Netlify — ${n}\n\n## Arrastar e soltar (mais fácil)\n1. \`npm run build\`\n2. Acesse
+https://app.netlify.com/drop\n3. Arraste a pasta \`dist/\`\n\n## CLI\n\`\`\`bash\nnpx netlify-cli deploy --dir dist
+--prod\n\`\`\`\n`);
+
+}else if(id==='ver'){
+zip.file('vite.config.ts',viteConfig());
+zip.file('package.json',pkgClean());
+zip.file('vercel.json',JSON.stringify({buildCommand:'npm run
+build',outputDirectory:'dist',framework:'vite',rewrites:[{source:'/(.*)',destination:'/index.html'}]},null,2));
+zip.file('.vercelignore',`node_modules\n.env\n*.log\n`);
+zip.file('README-VERCEL.md',`# Vercel — ${n}\n\n\`\`\`bash\nnpm run build\nnpx vercel\n\`\`\`\n\nOu arraste \`dist/\` em
+https://vercel.com/new\n`);
+
+}else{ // cln
+zip.file('vite.config.ts',viteConfig());
+zip.file('package.json',pkgClean());
+zip.file('README.md',`# ${n}\n\n\`\`\`bash\nnpm install\nnpm run dev\n\`\`\`\n\nBuild: \`npm run build\` → arraste
+\`dist/\` para https://app.netlify.com/drop\n`);
+}
+
+return zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function salvarBlob(blob,nome){
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;a.download=nome;a.click();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function toast(msg,tipo){
+const el=document.getElementById('toast');
+el.textContent=msg;
+el.className='toast '+(tipo==='ok'?'t-ok':tipo==='err'?'t-err':'t-info');
+el.style.opacity='1';
+clearTimeout(el._t);
+el._t=setTimeout(()=>el.style.opacity='0',2500);
+}
+
+function eh(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace( />/g,'&gt;');}
+function esc(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');}
+
+function loadJSZ(){
+return new Promise((res,rej)=>{
+if(window.JSZip){res(window.JSZip);return;}
+const s=document.createElement('script');
+s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+s.onload=()=>res(window.JSZip);
+s.onerror=()=>rej(new Error('JSZip não carregou — verifique sua conexão'));
+document.head.appendChild(s);
+});
+}
+
+// Drag & drop
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{
+e.preventDefault();dz.classList.remove('over');
+const f=Array.from(e.dataTransfer.files).find(f=>f.name.endsWith('.zip'));
+if(!f)return;
+const inp=document.getElementById('fi');
+const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;
+importarZip(inp);
+});
+</script>
+</body>
+
+</html>
